@@ -1,0 +1,458 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>Number Guessing Game</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <style>
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+    }
+
+    body {
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background:
+        linear-gradient(to bottom right, rgba(15, 23, 42, 0.7), rgba(30, 64, 175, 0.7)),
+        url("https://images.pexels.com/photos/3165335/pexels-photo-3165335.jpeg") center/cover no-repeat fixed;
+    }
+
+    .game-card {
+      background: rgba(255, 255, 255, 0.98);
+      padding: 24px 28px;
+      border-radius: 18px;
+      box-shadow: 0 20px 45px rgba(15, 23, 42, 0.45);
+      max-width: 380px;
+      width: 100%;
+      text-align: center;
+      animation: card-pop 0.5s ease-out;
+      backdrop-filter: blur(10px);
+    }
+
+    @keyframes card-pop {
+      from {
+        opacity: 0;
+        transform: translateY(15px) scale(0.96);
+      }
+      to {
+        opacity: 1;
+        transform: translateY(0) scale(1);
+      }
+    }
+
+    .title {
+      font-size: 1.4rem;
+      font-weight: 700;
+      margin-bottom: 4px;
+      color: #111827;
+    }
+
+    .subtitle {
+      font-size: 0.9rem;
+      color: #6b7280;
+      margin-bottom: 14px;
+    }
+
+    .range {
+      font-size: 0.9rem;
+      font-weight: 500;
+      color: #4b5563;
+      margin-bottom: 10px;
+    }
+
+    .stats {
+      display: flex;
+      justify-content: space-between;
+      font-size: 0.85rem;
+      color: #6b7280;
+      margin-bottom: 8px;
+    }
+
+    .stats span strong {
+      color: #111827;
+    }
+
+    .meta-row {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      font-size: 0.8rem;
+      color: #6b7280;
+      margin-bottom: 12px;
+      gap: 6px;
+    }
+
+    .difficulty label {
+      margin-right: 4px;
+    }
+
+    .difficulty select {
+      font-size: 0.8rem;
+      padding: 4px 6px;
+      border-radius: 8px;
+      border: 1px solid #d1d5db;
+      background: #f9fafb;
+      outline: none;
+    }
+
+    .emoji-display {
+      font-size: 2.3rem;
+      margin-bottom: 10px;
+      transition: transform 0.15s ease;
+    }
+
+    .emoji-pop {
+      transform: scale(1.1);
+    }
+
+    .input-row {
+      display: flex;
+      gap: 8px;
+      margin-bottom: 10px;
+    }
+
+    input[type="number"] {
+      flex: 1;
+      padding: 8px 10px;
+      border-radius: 10px;
+      border: 1px solid #d1d5db;
+      font-size: 0.9rem;
+      outline: none;
+      transition: border 0.2s ease, box-shadow 0.2s ease, transform 0.15s ease;
+    }
+
+    input[type="number"]:focus {
+      border-color: #4f46e5;
+      box-shadow: 0 0 0 3px rgba(79, 70, 229, 0.18);
+    }
+
+    .btn {
+      padding: 8px 14px;
+      border-radius: 10px;
+      border: none;
+      font-size: 0.9rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: transform 0.1s ease, box-shadow 0.15s ease, background 0.15s ease;
+      white-space: nowrap;
+    }
+
+    .btn-primary {
+      background: linear-gradient(to right, #4f46e5, #6366f1);
+      color: #ffffff;
+      box-shadow: 0 8px 16px rgba(79, 70, 229, 0.35);
+    }
+
+    .btn-primary:active {
+      transform: translateY(1px) scale(0.98);
+      box-shadow: 0 4px 10px rgba(79, 70, 229, 0.3);
+    }
+
+    .btn-secondary {
+      background: #f3f4f6;
+      color: #374151;
+      margin-top: 6px;
+    }
+
+    .btn-secondary:hover {
+      background: #e5e7eb;
+    }
+
+    .message {
+      min-height: 22px;
+      margin-top: 6px;
+      font-size: 0.9rem;
+    }
+
+    .msg-info {
+      color: #6b7280;
+    }
+    .msg-error {
+      color: #b91c1c;
+    }
+    .msg-low {
+      color: #2563eb;
+    }
+    .msg-high {
+      color: #d97706;
+    }
+    .msg-success {
+      color: #15803d;
+      font-weight: 600;
+    }
+
+    .shake {
+      animation: shake 0.25s ease;
+    }
+
+    @keyframes shake {
+      0% { transform: translateX(0); }
+      25% { transform: translateX(-3px); }
+      50% { transform: translateX(3px); }
+      75% { transform: translateX(-2px); }
+      100% { transform: translateX(0); }
+    }
+
+    .success-glow {
+      box-shadow: 0 0 0 3px rgba(22, 163, 74, 0.18);
+      border-color: #16a34a !important;
+    }
+
+    .hint {
+      margin-top: 10px;
+      font-size: 0.8rem;
+      color: #9ca3af;
+    }
+  </style>
+</head>
+<body>
+  <div class="game-card">
+    <div class="title">Number Guessing Game</div>
+    <div class="subtitle">Can you read my mind? 😏</div>
+
+    <div class="range">
+      I’m thinking of a number between
+      <strong id="minValue">1</strong> and <strong id="maxValue">100</strong>.
+    </div>
+
+    <!-- Attempts + Status -->
+    <div class="stats">
+      <span>Attempts: <strong id="attempts">0</strong></span>
+      <span>Status: <strong id="status">Playing</strong></span>
+    </div>
+
+    <!-- Best score + Difficulty -->
+    <div class="meta-row">
+      <span>Best: <strong id="bestScore">--</strong></span>
+      <div class="difficulty">
+        <label for="difficultySelect">Difficulty:</label>
+        <select id="difficultySelect">
+          <option value="easy">Easy (1–50)</option>
+          <option value="medium" selected>Medium (1–100)</option>
+          <option value="hard">Hard (1–500)</option>
+        </select>
+      </div>
+    </div>
+
+    <!-- Emoji display -->
+    <div id="emoji" class="emoji-display">🤖</div>
+
+    <div class="input-row">
+      <input
+        id="guessInput"
+        type="number"
+        placeholder="Enter your guess"
+      />
+      <button id="guessBtn" class="btn btn-primary">Guess</button>
+    </div>
+
+    <div id="message" class="message msg-info">Start guessing...</div>
+
+    <button id="resetBtn" class="btn btn-secondary">Play Again</button>
+
+    <div class="hint">
+      Tip: Use binary search style – keep cutting the range into half to find faster.
+    </div>
+  </div>
+
+  <script>
+    // Difficulty configuration
+    const difficulties = {
+      easy:   { min: 1, max: 50, label: "Easy" },
+      medium: { min: 1, max: 100, label: "Medium" },
+      hard:   { min: 1, max: 500, label: "Hard" }
+    };
+
+    let currentDifficulty = "medium";
+
+    let MIN;
+    let MAX;
+    let secretNumber;
+    let attempts;
+    let gameOver;
+    let bestScore = null;
+
+    const guessInput = document.getElementById("guessInput");
+    const guessBtn = document.getElementById("guessBtn");
+    const resetBtn = document.getElementById("resetBtn");
+    const attemptsSpan = document.getElementById("attempts");
+    const statusSpan = document.getElementById("status");
+    const messageDiv = document.getElementById("message");
+    const emojiDiv = document.getElementById("emoji");
+    const minValueSpan = document.getElementById("minValue");
+    const maxValueSpan = document.getElementById("maxValue");
+    const bestScoreSpan = document.getElementById("bestScore");
+    const difficultySelect = document.getElementById("difficultySelect");
+
+    const failEmojis = ["😅", "🙈", "🤔", "😬", "😵", "😭"];
+    const successEmojis = ["🎉", "🥳", "🤩", "🏆", "😎", "✨"];
+
+    function setMessage(text, typeClass) {
+      messageDiv.className = "message " + (typeClass || "msg-info");
+      messageDiv.textContent = text;
+    }
+
+    function setEmoji(mode) {
+      let list;
+      if (mode === "success") {
+        list = successEmojis;
+      } else if (mode === "fail") {
+        list = failEmojis;
+      } else {
+        emojiDiv.textContent = "🤖";
+        return;
+      }
+
+      const random = list[Math.floor(Math.random() * list.length)];
+      emojiDiv.textContent = random;
+
+      emojiDiv.classList.remove("emoji-pop");
+      void emojiDiv.offsetWidth;
+      emojiDiv.classList.add("emoji-pop");
+      setTimeout(() => emojiDiv.classList.remove("emoji-pop"), 150);
+    }
+
+    function bestScoreKey() {
+      return `ng_best_${currentDifficulty}`;
+    }
+
+    function updateBestUI() {
+      if (bestScore && Number.isFinite(bestScore)) {
+        bestScoreSpan.textContent = bestScore;
+      } else {
+        bestScoreSpan.textContent = "--";
+      }
+    }
+
+    function loadBestScore() {
+      const stored = localStorage.getItem(bestScoreKey());
+      const num = stored ? Number(stored) : NaN;
+      if (!Number.isNaN(num) && num > 0) {
+        bestScore = num;
+      } else {
+        bestScore = null;
+      }
+      updateBestUI();
+    }
+
+    function initGame() {
+      const config = difficulties[currentDifficulty];
+      MIN = config.min;
+      MAX = config.max;
+
+      secretNumber = Math.floor(Math.random() * (MAX - MIN + 1)) + MIN;
+      attempts = 0;
+      gameOver = false;
+
+      attemptsSpan.textContent = attempts;
+      statusSpan.textContent = "Playing";
+      minValueSpan.textContent = MIN;
+      maxValueSpan.textContent = MAX;
+
+      setMessage("Start guessing...", "msg-info");
+      setEmoji("neutral");
+
+      guessInput.value = "";
+      guessInput.disabled = false;
+      guessBtn.disabled = false;
+      guessInput.classList.remove("success-glow");
+      guessInput.focus();
+
+      loadBestScore();
+
+      console.log("Secret number (for testing):", secretNumber);
+    }
+
+    function handleGuess() {
+      if (gameOver) return;
+
+      const value = guessInput.value.trim();
+
+      if (value === "") {
+        setMessage("Please enter a number.", "msg-error");
+        addShake();
+        setEmoji("fail");
+        return;
+      }
+
+      const guess = Number(value);
+
+      if (Number.isNaN(guess) || !Number.isInteger(guess)) {
+        setMessage("Enter a valid integer.", "msg-error");
+        addShake();
+        setEmoji("fail");
+        return;
+      }
+
+      if (guess < MIN || guess > MAX) {
+        setMessage(`Your guess must be between ${MIN} and ${MAX}.`, "msg-error");
+        addShake();
+        setEmoji("fail");
+        return;
+      }
+
+      attempts++;
+      attemptsSpan.textContent = attempts;
+
+      if (guess === secretNumber) {
+        let winMessage = `🎉 Correct! You found it in ${attempts} attempts.`;
+        statusSpan.textContent = "Won";
+        gameOver = true;
+        guessInput.disabled = true;
+        guessBtn.disabled = true;
+        guessInput.classList.add("success-glow");
+        setEmoji("success");
+
+        if (!bestScore || attempts < bestScore) {
+          bestScore = attempts;
+          localStorage.setItem(bestScoreKey(), String(bestScore));
+          updateBestUI();
+          winMessage += " 🏅 New best score!";
+        }
+
+        setMessage(winMessage, "msg-success");
+      } else if (guess < secretNumber) {
+        setMessage("Too low! Try a higher number.", "msg-low");
+        statusSpan.textContent = "Guessing...";
+        addShake();
+        setEmoji("fail");
+      } else {
+        setMessage("Too high! Try a lower number.", "msg-high");
+        statusSpan.textContent = "Guessing...";
+        addShake();
+        setEmoji("fail");
+      }
+
+      guessInput.select();
+    }
+
+    function addShake() {
+      guessInput.classList.remove("shake");
+      void guessInput.offsetWidth;
+      guessInput.classList.add("shake");
+    }
+
+    guessBtn.addEventListener("click", handleGuess);
+
+    guessInput.addEventListener("keydown", function (event) {
+      if (event.key === "Enter") {
+        handleGuess();
+      }
+    });
+
+    resetBtn.addEventListener("click", initGame);
+
+    difficultySelect.addEventListener("change", function () {
+      currentDifficulty = this.value;
+      initGame();
+    });
+
+    initGame();
+  </script>
+</body>
+</html>
